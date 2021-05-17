@@ -4,54 +4,94 @@
     <input v-model.number="operand2" />
     = {{ result }}
     <div>
-      <button @click="calculated('sum')">+</button>
-      <button @click="calculated('sub')">-</button>
-      <button @click="calculated('div')">/</button>
-      <button @click="calculated('mul')">*</button>
-      <button @click="calculated('exp')">**</button>
-      <button @click="calculated('intDiv')">%/</button>
+      <button 
+      v-for="op in operations"
+      v-bind:key="op"
+      @click="calculated(op)">{{ op }}</button>
     </div>
+    <input type="checkbox" id="keyboard" v-model="showKeyboard">
+    <label for="keyboard">Показать экранную клавиатуру</label>
+  <div v-if="showKeyboard">
+    <button v-for="n in numbers"
+    :key="n"
+    @click="toInput(n, operand)">{{ n }}
+    </button>
+    <button @click="deleteLast(operand)"> Bs </button>
+    
+    <form>
+      <input type="radio" id="1" value="operand1" v-model="operand">
+      <label for="1">operand 1</label>
+
+      <input type="radio" id="2" value="operand2" v-model="operand">
+      <label for="2">operand 2</label>
+      
+    </form>
+  </div>
+  
   </div>
 </template>
 
 <script>
 export default {
- data: () => ({
-   operand1: 0,
-   operand2: 0,
-   result: 0,
- }),
- methods: {
-   calculated(operation) {
-     
-     switch (operation) {
-        case 'sum': 
-          this.result = this.operand1 + this.operand2;
+  data: () => ({
+    operand1: 0,
+    operand2: 0,
+    result: 0,
+    operations: ['+', '-', '*', '/', '**', '%'],
+    numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    showKeyboard: false,
+    operand: 'operand1',
+  }),
+  methods: {
+    calculated(operation) {
+      const { operand1, operand2 } = this;
+      const calcOperations = {
+        "+": () => operand1 + operand2,
+        "-": () => operand1 - operand2,
+        "*": () => operand1 * operand2,
+        "/": () => operand1 / operand2,
+        "**": () => operand1 ** operand2,
+        "%": () => Math.trunc(operand1 / operand2),
+      };
+
+      this.result = calcOperations[operation]();
+    },
+    toInput(n, operand) {
+
+      switch (operand) {
+        case 'operand1':
+          this.operand1 = Number(this.operand1 + n);
           break;
-        case 'sub':
-          this.result = this.operand1 - this.operand2;
+        case 'operand2':
+          this.operand2 = Number(this.operand2 + n);
           break;
-        case 'div':
-          this.result = this.operand1 / this.operand2;
+      }
+    
+    },
+
+    deleteLast(operand) {
+      switch (operand) {
+        case 'operand1':
+          this.operand1 = this.delNumber(this.operand1);
           break;
-        case 'mul':
-          this.result = this.operand1 * this.operand2;
+        case 'operand2':
+          this.operand2 = this.delNumber(this.operand2);
           break;
-        case 'exp':
-          this.result = this.operand1 ** this.operand2;
-          break;
-        case 'intDiv':
-          this.result = (this.operand1 - this.operand1 % this.operand2) / this.operand2;
-          break;
-     }
-   }
- },
-  
+      }
+
+    },
+    delNumber(n) {
+      const arr = Array.from(n.toString());
+      arr.pop();
+      n = Number(arr.join(''));
+      return n;
+    },
+  },
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
+
+<style modules lang="scss">
 h3 {
   margin: 40px 0 0;
 }
@@ -70,6 +110,6 @@ div {
   margin-top: 30px;
 }
 button {
-  margin-right: 10px;  
+  margin-right: 10px;
 }
 </style>
